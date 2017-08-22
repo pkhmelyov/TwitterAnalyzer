@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Security.Claims;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -9,6 +6,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using TwitterAnalyzer.WebUI.Models;
+using TwitterAnalyzer.Data.Entities;
+using TwitterAnalyzer.WebUI.Infrastructure;
 
 namespace TwitterAnalyzer.WebUI.Controllers
 {
@@ -151,7 +150,7 @@ namespace TwitterAnalyzer.WebUI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new TwitterUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -367,7 +366,7 @@ namespace TwitterAnalyzer.WebUI.Controllers
                 {
                     return View("ExternalLoginFailure");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new TwitterUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -392,6 +391,7 @@ namespace TwitterAnalyzer.WebUI.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            new FixedSessionStateCredentialStore().ClearAsync().Wait();
             return RedirectToAction("Index", "Home");
         }
 
