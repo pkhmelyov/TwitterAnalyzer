@@ -1,7 +1,11 @@
-﻿@{
+﻿@model TwitterAnalyzer.WebUI.Models.Home.About
+@{
     ViewBag.Title = "About";
 }
-<h2>@ViewBag.Title.</h2>
-<h3>@ViewBag.Message</h3>
 
-<p>Use this area to provide additional information.</p>
+<p>@Model.Username</p>
+<p>@Model.Tweets.Count</p>
+@foreach (var tweet in Model.Tweets)
+{
+    <p>@tweet.Text <b>@tweet.FavoriteCount</b></p>
+}

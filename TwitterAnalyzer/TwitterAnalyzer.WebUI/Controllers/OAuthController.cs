@@ -1,73 +1,37 @@
-﻿using System.Configuration;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using LinqToTwitter;
 using System.Threading.Tasks;
 using System;
 using TwitterAnalyzer.Data.Entities;
-using System.Web;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
-using TwitterAnalyzer.WebUI.Infrastructure;
 
 namespace TwitterAnalyzer.WebUI.Controllers
 {
     public class OAuthController : Controller
     {
-        private ApplicationUserManager _userManager;
-        private ApplicationSignInManager _signInManager;
-        private MvcSignInAuthorizer _mvcAuthorizer;
+        private readonly MvcSignInAuthorizer _mvcAuthorizer;
+        private readonly ApplicationUserManager _userManager;
+        private readonly ApplicationSignInManager _signInManager;
 
-        public ApplicationUserManager UserManager
+        public OAuthController(MvcSignInAuthorizer mvcAuthorizer, ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
-            get
-            {
-                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
-            }
-            private set
-            {
-                _userManager = value;
-            }
+            _mvcAuthorizer = mvcAuthorizer;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        public ApplicationSignInManager SignInManager
-        {
-            get
-            {
-                return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
-            }
-            private set
-            {
-                _signInManager = value;
-            }
-        }
-
-        public MvcSignInAuthorizer Authorizer
-        {
-            get
-            {
-                return _mvcAuthorizer ?? (_mvcAuthorizer = new MvcSignInAuthorizer
-                {
-                    CredentialStore = new FixedSessionStateCredentialStore
-                    {
-                        ConsumerKey = ConfigurationManager.AppSettings["consumerKey"],
-                        ConsumerSecret = ConfigurationManager.AppSettings["consumerSecret"]
-                    }
-                });
-            }
-        }
-
-        public async Task<ActionResult> BeginAsync()
+        public async Task<ActionResult> Begin()
         {
             string twitterCallbackUrl = Request.Url.ToString().Replace("Begin", "Complete");
-            return await Authorizer.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
+            return await _mvcAuthorizer.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
         }
 
-        public async Task<ActionResult> CompleteAsync()
+        public async Task<ActionResult> Complete()
         {
-            await Authorizer.CompleteAuthorizeAsync(Request.Url);
-            var credentials = Authorizer.CredentialStore;
+            await _mvcAuthorizer.CompleteAuthorizeAsync(Request.Url);
+            var credentials = _mvcAuthorizer.CredentialStore;
 
-            var user = await UserManager.FindByNameAsync(credentials.ScreenName);
+            var user = await _userManager.FindByNameAsync(credentials.ScreenName);
             IdentityResult identityResult = null;
             if (user == null)
             {
@@ -78,10 +42,10 @@ namespace TwitterAnalyzer.WebUI.Controllers
                     OAuthTokenSecret = credentials.OAuthTokenSecret,
                     TwitterId = credentials.UserID
                 };
-                identityResult = await UserManager.CreateAsync(user);
+                identityResult = await _userManager.CreateAsync(user);
             }
             if(identityResult == null || identityResult.Succeeded)
-                await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                await _signInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
             return RedirectToAction("Index", "Home");
         }

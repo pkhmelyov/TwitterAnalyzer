@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using LinqToTwitter;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
@@ -16,15 +17,17 @@ namespace TwitterAnalyzer.WebUI.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private ICredentialStore _credentialStore;
 
         public AccountController()
         {
         }
 
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager, ICredentialStore credentialStore)
         {
             UserManager = userManager;
             SignInManager = signInManager;
+            _credentialStore = credentialStore;
         }
 
         public ApplicationSignInManager SignInManager
@@ -391,7 +394,7 @@ namespace TwitterAnalyzer.WebUI.Controllers
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            new FixedSessionStateCredentialStore().ClearAsync().Wait();
+            _credentialStore.ClearAsync().Wait();
             return RedirectToAction("Index", "Home");
         }
 
