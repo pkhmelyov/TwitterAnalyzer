@@ -4,8 +4,28 @@
 }
 
 <p>@Model.Username</p>
-<p>@Model.Tweets.Count</p>
-@foreach (var tweet in Model.Tweets)
-{
-    <p>@tweet.Text <b>@tweet.FavoriteCount</b></p>
-}
+<table class="table table-bordered table-striped table-condensed table-hover">
+    <tr>
+        <th>Время</th>
+        <th>Количество твитов</th>
+        <th>Количество лайков</th>
+        <th>Медиана лайков</th>
+    </tr>
+    @foreach (var item in Model.Report)
+    {
+        var rowClass = "";
+        if (item.IsWorst)
+        {
+            rowClass = "danger";
+        } else if (item.IsBest)
+        {
+            rowClass = "success";
+        }
+        <tr class="@rowClass">
+            <td>@(item.Hour):00 - @(item.Hour + 1):00</td>
+            <td>@item.TweetsCount</td>
+            <td>@item.LikesCount</td>
+            <td>@item.LikesMedian</td>
+        </tr>
+    }
+</table>

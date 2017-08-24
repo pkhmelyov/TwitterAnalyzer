@@ -1,10 +1,9 @@
-﻿using LinqToTwitter;
-using System.Collections.Generic;
+﻿using TwitterAnalyzer.Data.Entities;
 
 namespace TwitterAnalyzer.WebUI.Domain
 {
     public interface IReportBuilder
     {
-        List<Status> GetUserStatuses(string userName);
+        ReportItem[] BuildReport(string userName);
     }
 }

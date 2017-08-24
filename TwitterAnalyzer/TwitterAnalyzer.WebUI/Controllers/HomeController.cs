@@ -21,7 +21,7 @@ namespace TwitterAnalyzer.WebUI.Controllers
         public ActionResult About(string username)
         {
             
-            var model = new About {Username = username, Tweets = _reportBuilder.GetUserStatuses(username)};
+            var model = new About {Username = username, Report = _reportBuilder.BuildReport(username)};
             return View(model);
         }
 

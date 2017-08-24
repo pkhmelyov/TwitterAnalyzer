@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using LinqToTwitter;
+﻿using TwitterAnalyzer.Data.Entities;
 
 namespace TwitterAnalyzer.WebUI.Models.Home
 {
     public class About
     {
         public string Username { get; set; }
-        public List<Status> Tweets { get; set; }
+        public ReportItem[] Report { get; set; }
     }
 }
