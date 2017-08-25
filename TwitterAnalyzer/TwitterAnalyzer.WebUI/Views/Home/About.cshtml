@@ -1,9 +1,9 @@
-﻿@model TwitterAnalyzer.WebUI.Models.Home.About
+﻿@model TwitterAnalyzer.Data.Entities.Report
 @{
     ViewBag.Title = "About";
 }
 
-<p>@Model.Username</p>
+<p>@Model.UserName</p>
 <table class="table table-bordered table-striped table-condensed table-hover">
     <tr>
         <th>Время</th>
@@ -11,15 +11,15 @@
         <th>Количество лайков</th>
         <th>Медиана лайков</th>
     </tr>
-    @foreach (var item in Model.Report)
+    @foreach (var item in Model.ReportItems)
     {
         var rowClass = "";
         if (item.IsWorst)
         {
-            rowClass = "danger";
+            rowClass = "danger text-danger";
         } else if (item.IsBest)
         {
-            rowClass = "success";
+            rowClass = "success text-success";
         }
         <tr class="@rowClass">
             <td>@(item.Hour):00 - @(item.Hour + 1):00</td>

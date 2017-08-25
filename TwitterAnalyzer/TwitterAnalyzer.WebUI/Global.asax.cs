@@ -4,9 +4,11 @@ using System.Web.Optimization;
 using System.Web.Routing;
 using Autofac;
 using Autofac.Integration.Mvc;
+using TwitterAnalyzer.Data;
 using TwitterAnalyzer.WebUI.Infrastructure;
 using LinqToTwitter;
 using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
 using TwitterAnalyzer.WebUI.Domain;
 
 namespace TwitterAnalyzer.WebUI
@@ -28,6 +30,8 @@ namespace TwitterAnalyzer.WebUI
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
             builder.RegisterModule<AutofacWebTypesModule>();
 
+            builder.RegisterModule<DataRegistrationModule>();
+
             builder.Register(
                 context =>
                     context.Resolve<HttpContextBase>()
@@ -44,16 +48,25 @@ namespace TwitterAnalyzer.WebUI
                 .AsSelf()
                 .ExternallyOwned();
 
+            builder.Register(
+                context =>
+                    context.Resolve<HttpContextBase>()
+                        .GetOwinContext()
+                        .Authentication)
+                .As<IAuthenticationManager>()
+                .ExternallyOwned();
+
             builder.RegisterType<FixedSessionStateCredentialStore>().As<ICredentialStore>().InstancePerLifetimeScope();
 
             builder.Register(context => new MvcSignInAuthorizer {CredentialStore = context.Resolve<ICredentialStore>()})
                 .As<IAuthorizer>()
-                .AsSelf()
+                .As<MvcSignInAuthorizer>()
                 .InstancePerLifetimeScope();
 
             builder.RegisterType<TwitterContext>().AsSelf().InstancePerLifetimeScope();
 
             builder.RegisterType<ReportBuilder>().As<IReportBuilder>();
+            builder.RegisterType<ReportManager>().As<IReportManager>();
 
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));

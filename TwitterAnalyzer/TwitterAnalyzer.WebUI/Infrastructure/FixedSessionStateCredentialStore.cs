@@ -9,13 +9,16 @@ namespace TwitterAnalyzer.WebUI.Infrastructure
     {
         public FixedSessionStateCredentialStore(HttpContextBase httpContext, ApplicationUserManager userManager)
         {
-            if (!HasAllCredentials() && httpContext.Request.IsAuthenticated)
+            if (!HasAllCredentials())
             {
-                var user = userManager.FindByNameAsync(httpContext.User.Identity.Name).Result;
                 ConsumerKey = ConfigurationManager.AppSettings["consumerKey"];
                 ConsumerSecret = ConfigurationManager.AppSettings["consumerSecret"];
-                OAuthToken = user.OAuthToken;
-                OAuthTokenSecret = user.OAuthTokenSecret;
+                if (httpContext.Request.IsAuthenticated)
+                {
+                    var user = userManager.FindByNameAsync(httpContext.User.Identity.Name).Result;
+                    OAuthToken = user.OAuthToken;
+                    OAuthTokenSecret = user.OAuthTokenSecret;
+                }
             }
         }
 

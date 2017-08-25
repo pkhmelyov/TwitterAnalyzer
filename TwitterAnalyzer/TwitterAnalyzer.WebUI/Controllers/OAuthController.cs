@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System;
 using TwitterAnalyzer.Data.Entities;
 using Microsoft.AspNet.Identity;
+using Microsoft.Owin.Security;
 
 namespace TwitterAnalyzer.WebUI.Controllers
 {
@@ -12,12 +13,14 @@ namespace TwitterAnalyzer.WebUI.Controllers
         private readonly MvcSignInAuthorizer _mvcAuthorizer;
         private readonly ApplicationUserManager _userManager;
         private readonly ApplicationSignInManager _signInManager;
+        private readonly IAuthenticationManager _authenticationManager;
 
-        public OAuthController(MvcSignInAuthorizer mvcAuthorizer, ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        public OAuthController(MvcSignInAuthorizer mvcAuthorizer, ApplicationUserManager userManager, ApplicationSignInManager signInManager, IAuthenticationManager authenticationManager)
         {
             _mvcAuthorizer = mvcAuthorizer;
             _userManager = userManager;
             _signInManager = signInManager;
+            _authenticationManager = authenticationManager;
         }
 
         public async Task<ActionResult> Begin()
@@ -47,6 +50,15 @@ namespace TwitterAnalyzer.WebUI.Controllers
             if(identityResult == null || identityResult.Succeeded)
                 await _signInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult LogOff()
+        {
+            _authenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            _mvcAuthorizer.CredentialStore.ClearAsync().Wait();
             return RedirectToAction("Index", "Home");
         }
     }

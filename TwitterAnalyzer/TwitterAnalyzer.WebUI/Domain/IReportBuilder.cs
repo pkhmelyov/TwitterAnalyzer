@@ -4,6 +4,6 @@ namespace TwitterAnalyzer.WebUI.Domain
 {
     public interface IReportBuilder
     {
-        ReportItem[] BuildReport(string userName);
+        Report BuildReport(string userName);
     }
 }

@@ -1,27 +1,31 @@
 ﻿using System.Web.Mvc;
+using TwitterAnalyzer.Data.Entities;
 using TwitterAnalyzer.WebUI.Domain;
-using TwitterAnalyzer.WebUI.Models.Home;
 
 namespace TwitterAnalyzer.WebUI.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IReportBuilder _reportBuilder;
+        private readonly IReportManager _reportManager;
 
-        public HomeController(IReportBuilder reportBuilder)
+        public HomeController(IReportManager reportManager)
         {
-            _reportBuilder = reportBuilder;
+            _reportManager = reportManager;
         }
 
         public ActionResult Index()
         {
-            return View();
+            Report[] reports;
+            if (Request.IsAuthenticated)
+                reports = _reportManager.GetRecentReportsForCurrentUser();
+            else
+                reports = _reportManager.GetRecentReports(1);
+            return View(reports);
         }
 
-        public ActionResult About(string username)
+        public ActionResult About(string userName)
         {
-            
-            var model = new About {Username = username, Report = _reportBuilder.BuildReport(username)};
+            var model = _reportManager.GetReport(userName);
             return View(model);
         }
 
