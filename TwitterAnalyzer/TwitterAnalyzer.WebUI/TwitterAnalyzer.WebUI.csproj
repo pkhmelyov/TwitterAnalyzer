@@ -203,8 +203,11 @@
     <Compile Include="Controllers\OAuthController.cs" />
     <Compile Include="Domain\IReportBuilder.cs" />
     <Compile Include="Domain\IReportManager.cs" />
+    <Compile Include="Domain\ITweetsInfoProvider.cs" />
+    <Compile Include="Domain\LinqToTwitterTweetsProvider.cs" />
     <Compile Include="Domain\ReportBuilder.cs" />
     <Compile Include="Domain\ReportManager.cs" />
+    <Compile Include="Domain\TweetInfo.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

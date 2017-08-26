@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using TwitterAnalyzer.Data.Entities;
 
@@ -28,12 +31,19 @@ namespace TwitterAnalyzer.Data.Repositories
 
         public Report GetReport(string userName)
         {
-            return _context.Reports.FirstOrDefault(report => report.UserName == userName);
+            return _context.Reports
+                .Include(report => report.ReportItems)
+                .FirstOrDefault(report => report.UserName == userName);
         }
 
         public void AddReport(Report report)
         {
             _context.Reports.Add(report);
+        }
+
+        public void DeleteItems(IEnumerable<ReportItem> items)
+        {
+            _context.ReportItems.RemoveRange(items);
         }
 
         public void SaveChanges()

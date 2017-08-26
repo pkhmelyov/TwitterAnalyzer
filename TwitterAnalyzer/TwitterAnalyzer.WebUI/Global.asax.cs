@@ -60,13 +60,14 @@ namespace TwitterAnalyzer.WebUI
 
             builder.Register(context => new MvcSignInAuthorizer {CredentialStore = context.Resolve<ICredentialStore>()})
                 .As<IAuthorizer>()
-                .As<MvcSignInAuthorizer>()
+                .AsSelf()
                 .InstancePerLifetimeScope();
 
             builder.RegisterType<TwitterContext>().AsSelf().InstancePerLifetimeScope();
 
-            builder.RegisterType<ReportBuilder>().As<IReportBuilder>();
-            builder.RegisterType<ReportManager>().As<IReportManager>();
+            builder.RegisterType<LinqToTwitterTweetsProvider>().As<ITweetsInfoProvider>().InstancePerLifetimeScope();
+            builder.RegisterType<ReportBuilder>().As<IReportBuilder>().InstancePerLifetimeScope();
+            builder.RegisterType<ReportManager>().As<IReportManager>().InstancePerLifetimeScope();
 
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));

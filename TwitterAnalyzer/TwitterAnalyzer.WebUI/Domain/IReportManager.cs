@@ -7,5 +7,6 @@ namespace TwitterAnalyzer.WebUI.Domain
         Report[] GetRecentReports(int page);
         Report[] GetRecentReportsForCurrentUser();
         Report GetReport(string userName);
+        void RegenerateReport(string userName);
     }
 }

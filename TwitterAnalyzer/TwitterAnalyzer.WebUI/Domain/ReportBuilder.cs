@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using LinqToTwitter;
 using System.Linq;
 using TwitterAnalyzer.Data.Entities;
 
@@ -8,54 +6,23 @@ namespace TwitterAnalyzer.WebUI.Domain
 {
     public class ReportBuilder : IReportBuilder
     {
-        private readonly TwitterContext _twitterContext;
+        private readonly ITweetsInfoProvider _tweetsProvider;
 
-        public ReportBuilder(TwitterContext twitterContext)
+        public ReportBuilder(ITweetsInfoProvider tweetsProvider)
         {
-            _twitterContext = twitterContext;
+            _tweetsProvider = tweetsProvider;
         }
 
-        private List<Status> GetUserStatuses(string userName)
+        public void BuildReport(Report report)
         {
-            ulong maxID;
-            int count = 200;
-            var statusList = new List<Status>();
-            var userStatusResponse =
-                _twitterContext.Status.Where(x => x.Type == StatusType.User && x.ScreenName == userName && x.Count == count)
-                    .ToList();
-            if (userStatusResponse.Any())
-            {
-                statusList.AddRange(userStatusResponse);
-                maxID = userStatusResponse.Min(status => status.StatusID) - 1;
-                while (userStatusResponse.Count != 0 && statusList.Count < 1000)
-                {
-                    count = 1000 - statusList.Count;
-                    if (count > 200) count = 200;
-                    userStatusResponse =
-                        _twitterContext.Status.Where(
-                            x =>
-                                x.Type == StatusType.User && x.ScreenName == userName && x.Count == count &&
-                                x.MaxID == maxID).ToList();
-                    if (userStatusResponse.Any())
-                    {
-                        maxID = userStatusResponse.Min(status => status.StatusID) - 1;
-                        statusList.AddRange(userStatusResponse);
-                    }
-                }
-            }
-            return statusList;
-        }
-
-        public Report BuildReport(string userName)
-        {
-            List<Status> tweets = GetUserStatuses(userName);
-            var details = tweets.GroupBy(tweet => tweet.CreatedAt.Hour).Select(
+            TweetInfo[] tweets = _tweetsProvider.GetRecentTweets(report.UserName);
+            var details = tweets.GroupBy(tweet => tweet.PostDate.Hour).Select(
                 group => new ReportItem
                 {
                     Hour = group.Key,
                     TweetsCount = group.Count(),
-                    LikesCount = group.Sum(tweet => tweet.FavoriteCount ?? 0),
-                    LikesMedian = CalculateMedian(group.Select(tweet => tweet.FavoriteCount ?? 0).ToArray())
+                    LikesCount = group.Sum(tweet => tweet.FavoritesCount),
+                    LikesMedian = CalculateMedian(group.Select(tweet => tweet.FavoritesCount).ToArray())
                 }).OrderBy(record => record.Hour).ToArray();
             var groupedReport = details.GroupBy(item => item.LikesMedian).OrderBy(group => group.Key);
             if (groupedReport.Count() > 1)
@@ -63,16 +30,19 @@ namespace TwitterAnalyzer.WebUI.Domain
                 groupedReport.First().OrderBy(item => item.LikesCount).First().IsWorst = true;
                 groupedReport.Last().OrderByDescending(item => item.LikesCount).First().IsBest = true;
             }
-            var result = new Report
-            {
-                UserName = userName,
-                UpdatedOn = DateTime.UtcNow,
-                TotalTweetsCount = tweets.Count,
-                TotalLikesCount = tweets.Sum(tweet => tweet.FavoriteCount ?? 0),
-                TotalLikesMedian = CalculateMedian(tweets.Select(tweet => tweet.FavoriteCount ?? 0).ToArray()),
-                BestHour = details.FirstOrDefault(x=>x.IsBest).Hour,
-                ReportItems = details
-            };
+
+            report.UpdatedOn = DateTime.UtcNow;
+            report.TotalTweetsCount = tweets.Length;
+            report.TotalLikesCount = tweets.Sum(tweet => tweet.FavoritesCount);
+            report.TotalLikesMedian = CalculateMedian(tweets.Select(tweet => tweet.FavoritesCount).ToArray());
+            report.BestHour = details.FirstOrDefault(x => x.IsBest).Hour;
+            report.ReportItems = details;
+        }
+
+        public Report BuildReport(string userName)
+        {
+            var result = new Report { UserName = userName };
+            BuildReport(result);
             return result;
         }
 

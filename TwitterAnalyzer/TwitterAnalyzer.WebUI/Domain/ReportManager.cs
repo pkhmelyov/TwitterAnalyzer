@@ -42,5 +42,24 @@ namespace TwitterAnalyzer.WebUI.Domain
             }
             return report;
         }
+
+        public void RegenerateReport(string userName)
+        {
+            userName = userName.Trim().ToLower();
+            var report = _reportRepository.GetReport(userName);
+            if (report != null)
+            {
+                ClearReport(report);
+                _reportBuilder.BuildReport(report);
+                _reportRepository.SaveChanges();
+            }
+        }
+
+        public void ClearReport(Report report)
+        {
+            _reportRepository.DeleteItems(report.ReportItems);
+            report.ReportItems.Clear();
+            _reportRepository.SaveChanges();
+        }
     }
 }

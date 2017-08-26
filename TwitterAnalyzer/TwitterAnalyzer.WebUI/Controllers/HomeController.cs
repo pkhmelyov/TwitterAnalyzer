@@ -29,6 +29,15 @@ namespace TwitterAnalyzer.WebUI.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ActionName("About")]
+        [ValidateAntiForgeryToken]
+        public ActionResult AboutPost(string userName)
+        {
+            _reportManager.RegenerateReport(userName);
+            return RedirectToAction("About", "Home", new { userName });
+        }
+
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";

@@ -1,4 +1,5 @@
-﻿using TwitterAnalyzer.Data.Entities;
+﻿using System.Collections.Generic;
+using TwitterAnalyzer.Data.Entities;
 
 namespace TwitterAnalyzer.Data.Repositories
 {
@@ -7,6 +8,7 @@ namespace TwitterAnalyzer.Data.Repositories
         Report[] GetRecentReports(string ownerId, int page, int pageSize);
         Report GetReport(string userName);
         void AddReport(Report report);
+        void DeleteItems(IEnumerable<ReportItem> items);
         void SaveChanges();
     }
 }
