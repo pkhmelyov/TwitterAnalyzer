@@ -25,7 +25,7 @@ namespace TwitterAnalyzer.WebUI.Controllers
 
         public async Task<ActionResult> Begin()
         {
-            string twitterCallbackUrl = Request.Url.ToString().Replace("Begin", "Complete");
+            string twitterCallbackUrl = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Host, Request.Url.PathAndQuery.Replace("Begin", "Complete"));
             return await _mvcAuthorizer.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
         }
 
