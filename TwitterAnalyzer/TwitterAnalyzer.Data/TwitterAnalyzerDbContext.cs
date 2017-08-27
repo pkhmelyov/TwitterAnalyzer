@@ -6,11 +6,6 @@ namespace TwitterAnalyzer.Data
 {
     public class TwitterAnalyzerDbContext : IdentityDbContext<TwitterUser>
     {
-        static TwitterAnalyzerDbContext()
-        {
-            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<TwitterAnalyzerDbContext>());
-        }
-
         public TwitterAnalyzerDbContext() : base("TwitterAnalyzerConnection") { }
 
         public static TwitterAnalyzerDbContext Create()

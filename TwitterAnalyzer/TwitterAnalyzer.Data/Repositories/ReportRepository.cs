@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using TwitterAnalyzer.Data.Entities;
 
 namespace TwitterAnalyzer.Data.Repositories
@@ -16,24 +17,21 @@ namespace TwitterAnalyzer.Data.Repositories
             _context = context;
         }
 
-        public Report[] GetRecentReports(string ownerId, int page, int pageSize)
+        public Task<Report[]> GetRecentReportsAsync(string ownerId, int page, int pageSize)
         {
-            Func<Report, bool> predicate;
-            if (string.IsNullOrWhiteSpace(ownerId)) predicate = report => true;
-            else predicate = report => report.UserId == ownerId;
             return
-                _context.Reports.Where(predicate)
+                _context.Reports.Where(report => ownerId == null || report.UserId == ownerId)
                     .OrderByDescending(x => x.UpdatedOn)
-                    .Skip((page - 1)*pageSize)
+                    .Skip((page - 1) * pageSize)
                     .Take(pageSize)
-                    .ToArray();
+                    .ToArrayAsync();
         }
 
-        public Report GetReport(string userName)
+        public Task<Report> GetReportAsync(string userName)
         {
             return _context.Reports
                 .Include(report => report.ReportItems)
-                .FirstOrDefault(report => report.UserName == userName);
+                .FirstOrDefaultAsync(report => report.UserName == userName);
         }
 
         public void AddReport(Report report)
@@ -46,9 +44,9 @@ namespace TwitterAnalyzer.Data.Repositories
             _context.ReportItems.RemoveRange(items);
         }
 
-        public void SaveChanges()
+        public Task SaveChangesAsync()
         {
-            _context.SaveChanges();
+            return _context.SaveChangesAsync();
         }
     }
 }

@@ -1,12 +1,13 @@
-﻿using TwitterAnalyzer.Data.Entities;
+﻿using System.Threading.Tasks;
+using TwitterAnalyzer.Data.Entities;
 
 namespace TwitterAnalyzer.WebUI.Domain
 {
     public interface IReportManager
     {
-        Report[] GetRecentReports(int page);
-        Report[] GetRecentReportsForCurrentUser();
-        Report GetReport(string userName);
-        void RegenerateReport(string userName);
+        Task<Report[]> GetRecentReportsAsync(int page);
+        Task<Report[]> GetRecentReportsForCurrentUserAsync();
+        Task<Report> GetReportAsync(string userName);
+        Task RegenerateReportAsync(string userName);
     }
 }

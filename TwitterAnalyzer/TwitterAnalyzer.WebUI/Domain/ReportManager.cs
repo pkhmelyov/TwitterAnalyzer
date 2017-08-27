@@ -2,6 +2,7 @@
 using Microsoft.AspNet.Identity;
 using TwitterAnalyzer.Data.Entities;
 using TwitterAnalyzer.Data.Repositories;
+using System.Threading.Tasks;
 
 namespace TwitterAnalyzer.WebUI.Domain
 {
@@ -19,50 +20,50 @@ namespace TwitterAnalyzer.WebUI.Domain
             _currentUserId = httpContext.User.Identity.GetUserId();
         }
 
-        public Report[] GetRecentReports(int page)
+        public Task<Report[]> GetRecentReportsAsync(int page)
         {
-            return _reportRepository.GetRecentReports(ownerId: null, page: page <= 0 ? 1 : page, pageSize: _pageSize);
+            return _reportRepository.GetRecentReportsAsync(ownerId: null, page: page <= 0 ? 1 : page, pageSize: _pageSize);
         }
 
-        public Report[] GetRecentReportsForCurrentUser()
+        public Task<Report[]> GetRecentReportsForCurrentUserAsync()
         {
-            return _reportRepository.GetRecentReports(ownerId: _currentUserId, page: 1, pageSize: _pageSize);
+            return _reportRepository.GetRecentReportsAsync(ownerId: _currentUserId, page: 1, pageSize: _pageSize);
         }
 
-        public Report GetReport(string userName)
+        public async Task<Report> GetReportAsync(string userName)
         {
             userName = userName.Trim().ToLower();
-            var report = _reportRepository.GetReport(userName);
+            var report = await _reportRepository.GetReportAsync(userName);
             if (report == null)
             {
-                report = _reportBuilder.BuildReport(userName);
+                report = await _reportBuilder.BuildReportAsync(userName);
                 if(report != null)
                 {
                     report.UserId = _currentUserId;
                     _reportRepository.AddReport(report);
-                    _reportRepository.SaveChanges();
+                    await _reportRepository.SaveChangesAsync();
                 }
             }
             return report;
         }
 
-        public void RegenerateReport(string userName)
+        public async Task RegenerateReportAsync(string userName)
         {
             userName = userName.Trim().ToLower();
-            var report = _reportRepository.GetReport(userName);
+            var report = await _reportRepository.GetReportAsync(userName);
             if (report != null)
             {
-                ClearReport(report);
-                if(_reportBuilder.BuildReport(report))
-                    _reportRepository.SaveChanges();
+                await ClearReportAsync(report);
+                if(await _reportBuilder.BuildReportAsync(report))
+                    await _reportRepository.SaveChangesAsync();
             }
         }
 
-        public void ClearReport(Report report)
+        public async Task ClearReportAsync(Report report)
         {
             _reportRepository.DeleteItems(report.ReportItems);
             report.ReportItems.Clear();
-            _reportRepository.SaveChanges();
+            await _reportRepository.SaveChangesAsync();
         }
     }
 }

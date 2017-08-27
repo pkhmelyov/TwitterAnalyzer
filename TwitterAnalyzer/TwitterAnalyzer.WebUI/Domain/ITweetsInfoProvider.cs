@@ -1,7 +1,9 @@
-﻿namespace TwitterAnalyzer.WebUI.Domain
+﻿using System.Threading.Tasks;
+
+namespace TwitterAnalyzer.WebUI.Domain
 {
     public interface ITweetsInfoProvider
     {
-        TweetInfo[] GetRecentTweets(string userName);
+        Task<TweetInfo[]> GetRecentTweetsAsync(string userName);
     }
 }

@@ -2,6 +2,7 @@
 using LinqToTwitter;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace TwitterAnalyzer.WebUI.Domain
 {
@@ -17,16 +18,16 @@ namespace TwitterAnalyzer.WebUI.Domain
             _twitterContext = twitterContext;
         }
 
-        public TweetInfo[] GetRecentTweets(string userName)
+        public async Task<TweetInfo[]> GetRecentTweetsAsync(string userName)
         {
             ulong maxID;
             int count = 200;
             var statusList = new List<TweetInfo>();
             try
             {
-                var userStatusResponse =
+                var userStatusResponse = await
                 _twitterContext.Status.Where(x => x.Type == StatusType.User && x.ScreenName == userName && x.Count == count)
-                    .ToList();
+                    .ToListAsync();
                 if (userStatusResponse.Any())
                 {
                     statusList.AddRange(userStatusResponse.Select(_statusToTweetInfo));
@@ -35,11 +36,11 @@ namespace TwitterAnalyzer.WebUI.Domain
                     {
                         count = _maxTweetsCount - statusList.Count;
                         if (count > 200) count = 200;
-                        userStatusResponse =
+                        userStatusResponse = await
                             _twitterContext.Status.Where(
                                 x =>
                                     x.Type == StatusType.User && x.ScreenName == userName && x.Count == count &&
-                                    x.MaxID == maxID).ToList();
+                                    x.MaxID == maxID).ToListAsync();
                         if (userStatusResponse.Any())
                         {
                             maxID = userStatusResponse.Min(status => status.StatusID) - 1;

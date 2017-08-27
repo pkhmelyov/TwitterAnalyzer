@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using System.Threading.Tasks;
+using System.Web.Mvc;
 using TwitterAnalyzer.Data.Entities;
 using TwitterAnalyzer.WebUI.Domain;
 
@@ -13,29 +14,29 @@ namespace TwitterAnalyzer.WebUI.Controllers
             _reportManager = reportManager;
         }
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
             Report[] reports;
             if (Request.IsAuthenticated)
-                reports = _reportManager.GetRecentReportsForCurrentUser();
+                reports = await _reportManager.GetRecentReportsForCurrentUserAsync();
             else
-                reports = _reportManager.GetRecentReports(1);
+                reports = await _reportManager.GetRecentReportsAsync(1);
             return View(reports);
         }
 
-        public ActionResult About(string userName)
+        public async Task<ActionResult> About(string userName)
         {
             if (string.IsNullOrWhiteSpace(userName) || userName.Trim() == "@") userName = User.Identity.Name;
-            var model = _reportManager.GetReport(userName);
+            var model = await _reportManager.GetReportAsync(userName);
             return View(model);
         }
 
         [HttpPost]
         [ActionName("About")]
         [ValidateAntiForgeryToken]
-        public ActionResult AboutPost(string userName)
+        public async Task<ActionResult> AboutPost(string userName)
         {
-            _reportManager.RegenerateReport(userName);
+            await _reportManager.RegenerateReportAsync(userName);
             return RedirectToAction("About", "Home", new { userName });
         }
     }

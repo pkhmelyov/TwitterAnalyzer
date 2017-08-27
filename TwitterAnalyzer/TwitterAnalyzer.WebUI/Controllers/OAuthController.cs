@@ -56,10 +56,10 @@ namespace TwitterAnalyzer.WebUI.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult LogOff()
+        public async Task<ActionResult> LogOff()
         {
             _authenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            _mvcAuthorizer.CredentialStore.ClearAsync().Wait();
+            await _mvcAuthorizer.CredentialStore.ClearAsync();
             return RedirectToAction("Index", "Home");
         }
     }

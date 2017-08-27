@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using TwitterAnalyzer.Data.Entities;
 
 namespace TwitterAnalyzer.WebUI.Domain
@@ -13,9 +14,9 @@ namespace TwitterAnalyzer.WebUI.Domain
             _tweetsProvider = tweetsProvider;
         }
 
-        public bool BuildReport(Report report)
+        public async Task<bool> BuildReportAsync(Report report)
         {
-            TweetInfo[] tweets = _tweetsProvider.GetRecentTweets(report.UserName);
+            TweetInfo[] tweets = await _tweetsProvider.GetRecentTweetsAsync(report.UserName);
             if (tweets == null) return false;
             var details = tweets.GroupBy(tweet => tweet.PostDate.Hour).Select(
                 group => new ReportItem
@@ -42,10 +43,10 @@ namespace TwitterAnalyzer.WebUI.Domain
             return true;
         }
 
-        public Report BuildReport(string userName)
+        public async Task<Report> BuildReportAsync(string userName)
         {
             var result = new Report { UserName = userName };
-            if(BuildReport(result)) return result;
+            if(await BuildReportAsync(result)) return result;
             return null;
         }
 

@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TwitterAnalyzer.Data.Entities;
 
 namespace TwitterAnalyzer.Data.Repositories
 {
     public interface IReportRepository
     {
-        Report[] GetRecentReports(string ownerId, int page, int pageSize);
-        Report GetReport(string userName);
+        Task<Report[]> GetRecentReportsAsync(string ownerId, int page, int pageSize);
+        Task<Report> GetReportAsync(string userName);
         void AddReport(Report report);
         void DeleteItems(IEnumerable<ReportItem> items);
-        void SaveChanges();
+        Task SaveChangesAsync();
     }
 }
