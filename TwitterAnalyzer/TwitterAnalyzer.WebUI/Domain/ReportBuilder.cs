@@ -13,9 +13,10 @@ namespace TwitterAnalyzer.WebUI.Domain
             _tweetsProvider = tweetsProvider;
         }
 
-        public void BuildReport(Report report)
+        public bool BuildReport(Report report)
         {
             TweetInfo[] tweets = _tweetsProvider.GetRecentTweets(report.UserName);
+            if (tweets == null) return false;
             var details = tweets.GroupBy(tweet => tweet.PostDate.Hour).Select(
                 group => new ReportItem
                 {
@@ -35,15 +36,17 @@ namespace TwitterAnalyzer.WebUI.Domain
             report.TotalTweetsCount = tweets.Length;
             report.TotalLikesCount = tweets.Sum(tweet => tweet.FavoritesCount);
             report.TotalLikesMedian = CalculateMedian(tweets.Select(tweet => tweet.FavoritesCount).ToArray());
-            report.BestHour = details.FirstOrDefault(x => x.IsBest).Hour;
+            var best = details.FirstOrDefault(x => x.IsBest);
+            report.BestHour = best == null ? (int?)null : best.Hour;
             report.ReportItems = details;
+            return true;
         }
 
         public Report BuildReport(string userName)
         {
             var result = new Report { UserName = userName };
-            BuildReport(result);
-            return result;
+            if(BuildReport(result)) return result;
+            return null;
         }
 
         private double CalculateMedian(int[] numbers)

@@ -22,30 +22,39 @@ namespace TwitterAnalyzer.WebUI.Domain
             ulong maxID;
             int count = 200;
             var statusList = new List<TweetInfo>();
-            var userStatusResponse =
+            try
+            {
+                var userStatusResponse =
                 _twitterContext.Status.Where(x => x.Type == StatusType.User && x.ScreenName == userName && x.Count == count)
                     .ToList();
-            if (userStatusResponse.Any())
-            {
-                statusList.AddRange(userStatusResponse.Select(_statusToTweetInfo));
-                maxID = userStatusResponse.Min(status => status.StatusID) - 1;
-                while (userStatusResponse.Count != 0 && statusList.Count < _maxTweetsCount)
+                if (userStatusResponse.Any())
                 {
-                    count = _maxTweetsCount - statusList.Count;
-                    if (count > 200) count = 200;
-                    userStatusResponse =
-                        _twitterContext.Status.Where(
-                            x =>
-                                x.Type == StatusType.User && x.ScreenName == userName && x.Count == count &&
-                                x.MaxID == maxID).ToList();
-                    if (userStatusResponse.Any())
+                    statusList.AddRange(userStatusResponse.Select(_statusToTweetInfo));
+                    maxID = userStatusResponse.Min(status => status.StatusID) - 1;
+                    while (userStatusResponse.Count != 0 && statusList.Count < _maxTweetsCount)
                     {
-                        maxID = userStatusResponse.Min(status => status.StatusID) - 1;
-                        statusList.AddRange(userStatusResponse.Select(_statusToTweetInfo));
+                        count = _maxTweetsCount - statusList.Count;
+                        if (count > 200) count = 200;
+                        userStatusResponse =
+                            _twitterContext.Status.Where(
+                                x =>
+                                    x.Type == StatusType.User && x.ScreenName == userName && x.Count == count &&
+                                    x.MaxID == maxID).ToList();
+                        if (userStatusResponse.Any())
+                        {
+                            maxID = userStatusResponse.Min(status => status.StatusID) - 1;
+                            statusList.AddRange(userStatusResponse.Select(_statusToTweetInfo));
+                        }
                     }
                 }
+                return statusList.ToArray();
             }
-            return statusList.ToArray();
+            catch(AggregateException ex)
+            {
+                if (ex.InnerExceptions.Any(x => x is TwitterQueryException))
+                    return null;
+                else throw;
+            }
         }
     }
 }

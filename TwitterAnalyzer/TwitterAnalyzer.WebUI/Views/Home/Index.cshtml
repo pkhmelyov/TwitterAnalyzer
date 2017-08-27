@@ -42,7 +42,16 @@
                         <td>@report.TotalTweetsCount</td>
                         <td>@report.TotalLikesCount</td>
                         <td>@report.TotalLikesMedian</td>
-                        <td>@(report.BestHour):00 - @(report.BestHour + 1):00</td>
+                        <td>
+                            @if(report.BestHour == null)
+                            {
+                                @:Не удалось определить
+                            }
+                            else
+                            {
+                                @report.BestHour<text>:00 - </text>@(report.BestHour + 1)<text>:00</text>
+}
+                        </td>
                     </tr>
                 }
             }

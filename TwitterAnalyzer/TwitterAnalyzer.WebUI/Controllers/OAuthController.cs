@@ -29,8 +29,9 @@ namespace TwitterAnalyzer.WebUI.Controllers
             return await _mvcAuthorizer.BeginAuthorizationAsync(new Uri(twitterCallbackUrl));
         }
 
-        public async Task<ActionResult> Complete()
+        public async Task<ActionResult> Complete(string denied)
         {
+            if (!string.IsNullOrWhiteSpace(denied)) return RedirectToAction("Index", "Home");
             await _mvcAuthorizer.CompleteAuthorizeAsync(Request.Url);
             var credentials = _mvcAuthorizer.CredentialStore;
 

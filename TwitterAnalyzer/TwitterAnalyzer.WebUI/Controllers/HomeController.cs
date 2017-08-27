@@ -25,6 +25,7 @@ namespace TwitterAnalyzer.WebUI.Controllers
 
         public ActionResult About(string userName)
         {
+            if (string.IsNullOrWhiteSpace(userName) || userName.Trim() == "@") userName = User.Identity.Name;
             var model = _reportManager.GetReport(userName);
             return View(model);
         }
@@ -36,13 +37,6 @@ namespace TwitterAnalyzer.WebUI.Controllers
         {
             _reportManager.RegenerateReport(userName);
             return RedirectToAction("About", "Home", new { userName });
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
         }
     }
 }

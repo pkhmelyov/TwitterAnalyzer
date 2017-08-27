@@ -2,50 +2,56 @@
 @{
     ViewBag.Title = "Отчет по пользователю";
 }
-
-<h1>Отчёт по пользователю <i>@Model.UserName</i></h1>
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">
-            @if (Request.IsAuthenticated)
-            {
-                using (Html.BeginForm("About", "Home", FormMethod.Post, new { style = "display: inline-block;" }))
+@if(Model == null)
+{
+    <h1>Не удалось сформировать отчет по вашему запросу</h1>
+}
+else
+{
+    <h1>Отчёт по пользователю <i>@Model.UserName</i></h1>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                @if (Request.IsAuthenticated)
                 {
-                    @Html.AntiForgeryToken()
-                    @Html.HiddenFor(x => x.UserName)
-                    ;
-                    <input type="submit" value="Перестроить отчёт" class="btn btn-primary" />
+                    using (Html.BeginForm("About", "Home", FormMethod.Post, new { style = "display: inline-block;" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(x => x.UserName)
+                        ;
+                        <input type="submit" value="Перестроить отчёт" class="btn btn-primary" />
+                    }
                 }
-            }
-            Отчет сформирован: @Model.UpdatedOn.ToString("dd.MM.yyyy hh:mm")
-        </h3>
-    </div>
-    <div class="panel-body">
-        <table class="table table-bordered table-striped table-condensed table-hover">
-            <tr>
-                <th>Время</th>
-                <th>Количество твитов</th>
-                <th>Количество лайков</th>
-                <th>Медиана лайков</th>
-            </tr>
-            @foreach (var item in Model.ReportItems)
-            {
-                var rowClass = "";
-                if (item.IsWorst)
-                {
-                    rowClass = "danger text-danger";
-                }
-                else if (item.IsBest)
-                {
-                    rowClass = "success text-success";
-                }
-                <tr class="@rowClass">
-                    <td>@(item.Hour):00 - @(item.Hour + 1):00</td>
-                    <td>@item.TweetsCount</td>
-                    <td>@item.LikesCount</td>
-                    <td>@item.LikesMedian</td>
+                Отчет сформирован: @Model.UpdatedOn.ToString("dd.MM.yyyy HH:mm")
+            </h3>
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered table-striped table-condensed table-hover">
+                <tr>
+                    <th>Время</th>
+                    <th>Количество твитов</th>
+                    <th>Количество лайков</th>
+                    <th>Медиана лайков</th>
                 </tr>
-            }
-        </table>
+                @foreach (var item in Model.ReportItems)
+                {
+                    var rowClass = "";
+                    if (item.IsWorst)
+                    {
+                        rowClass = "danger text-danger";
+                    }
+                    else if (item.IsBest)
+                    {
+                        rowClass = "success text-success";
+                    }
+                    <tr class="@rowClass">
+                        <td>@(item.Hour):00 - @(item.Hour + 1):00</td>
+                        <td>@item.TweetsCount</td>
+                        <td>@item.LikesCount</td>
+                        <td>@item.LikesMedian</td>
+                    </tr>
+                }
+            </table>
+        </div>
     </div>
-</div>
+}

@@ -36,9 +36,12 @@ namespace TwitterAnalyzer.WebUI.Domain
             if (report == null)
             {
                 report = _reportBuilder.BuildReport(userName);
-                report.UserId = _currentUserId;
-                _reportRepository.AddReport(report);
-                _reportRepository.SaveChanges();
+                if(report != null)
+                {
+                    report.UserId = _currentUserId;
+                    _reportRepository.AddReport(report);
+                    _reportRepository.SaveChanges();
+                }
             }
             return report;
         }
@@ -50,8 +53,8 @@ namespace TwitterAnalyzer.WebUI.Domain
             if (report != null)
             {
                 ClearReport(report);
-                _reportBuilder.BuildReport(report);
-                _reportRepository.SaveChanges();
+                if(_reportBuilder.BuildReport(report))
+                    _reportRepository.SaveChanges();
             }
         }
 
